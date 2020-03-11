@@ -107,7 +107,7 @@ async def app(src: pathlib.Path, target: pathlib.Path, verbose: bool = False):
     asyncio.create_task(assign_items_to_queues(src, bd_queue, fl_queue))
     # Giving some time for the loop to fill the queues with the bds
     await asyncio.sleep(0.01)
-    while bd_queue.qsize() != 0:
+    while bd_queue.qsize():
         asyncio.create_task(
             bouquet_designs_consumer(bd_queue, fl_queue, b_queue)
         )
