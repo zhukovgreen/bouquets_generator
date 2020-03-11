@@ -1,0 +1,41 @@
+[tool.black]
+line-length=79
+target-version=["py38"]
+
+[tool.coverage.run]
+branch = true
+source = ["bouquets_generator"]
+
+[tool.coverage.paths]
+source = ["bouquets_generator/"]
+
+[tool.coverage.report]
+fail_under = 90
+skip_covered = true
+show_missing = true
+
+[tool.poetry]
+name = "bouquets-generator"
+version = "0.1.0"
+description = ""
+authors = ["zhukovgreen <iam@zhukovgreen.pro>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+attrs = "^19.3.0"
+aiofiles = "^0.4.0"
+click = "^7.1.1"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.3.5"
+pytest-cov = "^2.8.1"
+pytest-asyncio = "^0.10.0"
+coverage = {version = "^5.0.3", extras = ["toml"]}
+
+[tool.poetry.scripts]
+bouquets = "bouquets_generator.console:main"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
+
