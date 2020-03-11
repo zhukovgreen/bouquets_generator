@@ -5,8 +5,17 @@ import random
 import sys
 
 import aiofiles
+from envparse import env
 
 from bouquets_generator.structs import BouquetDesign, Bouquet, Flower
+
+env.read_envfile(pathlib.Path(__file__).parents[1] / ".env")
+
+logging.basicConfig(
+    stream=sys.stdout,
+    level=logging.DEBUG if env.bool("DEBUG", default=False) else logging.INFO,
+    format=">> %(message)s",
+)
 
 logger = logging.getLogger(__name__)
 
@@ -87,7 +96,7 @@ async def write_stream_to_file(f_path, stream: asyncio.Queue):
     logger.info(f"Successfully written to {repr(f_path)}.")
 
 
-async def app(src: pathlib.Path, target: pathlib.Path, verbose: bool = False):
+async def app(src: pathlib.Path, target: pathlib.Path):
     """Cli app for generating bouquets from bouquets designs.
 
     Common abbreviations:
@@ -101,11 +110,6 @@ async def app(src: pathlib.Path, target: pathlib.Path, verbose: bool = False):
     :param target: path to the file where to write bouquets stream
     :param verbose: add verbosity
     """
-    logging.basicConfig(
-        stream=sys.stdout,
-        level=logging.INFO if not verbose else logging.DEBUG,
-        format=">> %(message)s",
-    )
     bd_queue = asyncio.Queue()
     fl_queue = asyncio.Queue()
     b_queue = asyncio.Queue()

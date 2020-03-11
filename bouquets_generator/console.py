@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import pathlib
 
 import click
@@ -48,10 +49,6 @@ def main(verbose, src, target):
 
 
     """
-    asyncio.run(
-        app(
-            src=pathlib.Path(src),
-            target=pathlib.Path(target),
-            verbose=verbose,
-        )
-    )
+    if verbose:
+        logging.getLogger().setLevel(logging.DEBUG)
+    asyncio.run(app(src=pathlib.Path(src), target=pathlib.Path(target),))
