@@ -63,6 +63,7 @@ async def bouquet_designs_consumer(
                 )
                 bouquet_designs_queue.task_done()
                 await bouquets_queue.put(bouquet.to_str())
+                asyncio.current_task().cancel()
 
 
 async def assign_items_to_queues(
@@ -93,6 +94,7 @@ async def write_stream_to_file(f_path, stream: asyncio.Queue):
     async with aiofiles.open(f_path, "w") as f:
         while stream.qsize():
             await f.write(await stream.get() + "\n")
+            stream.task_done()
     logger.info(f"Successfully written to {repr(f_path)}.")
 
 
@@ -114,7 +116,9 @@ async def app(src: pathlib.Path, target: pathlib.Path):
     fl_queue = asyncio.Queue()
     b_queue = asyncio.Queue()
     logger.info("Queues created")
-    asyncio.create_task(assign_items_to_queues(src, bd_queue, fl_queue))
+    queues_assignments = asyncio.create_task(
+        assign_items_to_queues(src, bd_queue, fl_queue)
+    )
     # Giving some time for the loop to fill the queues with the bds
     await asyncio.sleep(0.01)
     while bd_queue.qsize():
@@ -125,4 +129,7 @@ async def app(src: pathlib.Path, target: pathlib.Path):
         await asyncio.sleep(0)
     await bd_queue.join()
     logger.info(f"Success. All bouquets produced!!!")
+    # cancelling tasks
+    queues_assignments.cancel()
     await write_stream_to_file(target, b_queue)
+    await b_queue.join()
