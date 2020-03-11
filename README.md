@@ -15,11 +15,13 @@ Options:  -v, --verbose  Verbosity of the tool
 # Demo
 ![gif](./gif.gif)
 
-# Dockerfile
+# Development environment
 
 Run tests:
 
-- docker-compose run tests
+- [docker] docker-compose run tests
+- [local] poetry run pytest
+
 
 Play with the cli
 
