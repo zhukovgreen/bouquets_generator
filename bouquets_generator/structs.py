@@ -2,7 +2,7 @@ import logging
 import re
 from copy import copy
 from enum import Enum
-from typing import Dict
+from typing import Dict, Optional
 
 import attr
 
@@ -95,7 +95,9 @@ class Bouquet:
     def __attrs_post_init__(self):
         self._required_flowers = copy(self.design.flowers)
 
-    async def use(self, flower: Flower) -> None:
+    async def use(
+        self, flower: Flower, *, additional_debug_str: Optional[str]
+    ) -> None:
         try:
             origin_flower = flower
             if flower not in self._required_flowers:
@@ -103,7 +105,9 @@ class Bouquet:
             self._required_flowers[flower] -= 1
         except KeyError:
             logger.debug(
-                f"Flower {repr(flower)} is incompatible with the"
+                additional_debug_str
+                + " "
+                + f"Flower {repr(flower)} is incompatible with the"
                 f" bouquet design {self.design}"
             )
             raise
@@ -111,10 +115,18 @@ class Bouquet:
             self.flowers[origin_flower] = (
                 self.flowers.get(origin_flower, 0) + 1
             )
-            logger.debug(f"Flower matched: {repr(origin_flower)}")
+            logger.debug(
+                additional_debug_str
+                + " "
+                + f"Flower matched: {repr(origin_flower)}"
+            )
             if not self._required_flowers[flower]:
                 del self._required_flowers[flower]
-                logger.debug(f"Flowers of type {repr(flower)} completed")
+                logger.debug(
+                    additional_debug_str
+                    + " "
+                    + f"Flowers of type {repr(flower)} completed"
+                )
 
     @property
     def is_ready(self):

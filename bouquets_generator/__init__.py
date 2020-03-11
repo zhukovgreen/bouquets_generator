@@ -33,13 +33,18 @@ async def bouquet_designs_consumer(
         )
         flower = Flower.from_str(fl_str)
         try:
-            await bouquet.use(flower)
+            await bouquet.use(
+                flower, additional_debug_str=f"Worker id {repr(worker_id)}"
+            )
         except KeyError:
             # if flower is not compatible with the design
             # we put it back to the queue and allow switch the context
             # to another task
             await flowers_queue.put(fl_str)
-            logger.debug(f"Flower {repr(fl_str)} returned to the queue")
+            logger.debug(
+                f"Worker id {repr(worker_id)} Flower {repr(fl_str)}"
+                f" returned to the queue"
+            )
             await asyncio.sleep(0)
         else:
             if bouquet.is_ready:
@@ -72,13 +77,14 @@ async def assign_items_to_queues(
                 target_queue = fl_queue
             else:
                 await target_queue.put(line)
+    logger.info(f"Input file was processed into the queues.")
 
 
 async def write_stream_to_file(f_path, stream: asyncio.Queue):
     async with aiofiles.open(f_path, "w") as f:
         while stream.qsize():
             await f.write(await stream.get() + "\n")
-    logger.info(f"Successfuly written to {repr(f_path)}.")
+    logger.info(f"Successfully written to {repr(f_path)}.")
 
 
 async def app(src: pathlib.Path, target: pathlib.Path, verbose: bool = False):
